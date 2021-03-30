@@ -58,6 +58,25 @@ HIDDEN void create_process(state_t *proc_state){
     proc_state->reg_v0 = ret_val;
 }
 
+/*terminate the current process along with its progeny*/
+HIDDEN void terminate_process(pcb_PTR process){   
+    if(process != NULL){
+        if(process->p_child != NULL){
+            terminate_process(process->p_child);            
+        }
+        if(process->p_next_sib != NULL){
+            terminate_process(process->p_next_sib);
+        }        
+        freePcb(process);
+        process = outProcQ(&readyQueue ,process);
+    }
+}
+
+/*return the value of p_supportStruct from the current process*/
+HIDDEN support_t* get_support_data(){
+    return currentProcess->p_supportStruct;
+}
+
 HIDDEN void retControl(state_t *proc_state, int isBlocking){
     /*we need to update pc, otherwise we will enter an infinite syscall loop*/
     proc_state->pc_epc += WORDLEN;
